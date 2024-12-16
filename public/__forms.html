@@ -1,11 +1,102 @@
-<html>
-    <head></head>
-    <body>
-        <form name="feedback" data-netlify="true" hidden>
-            <input type="hidden" name="form-name" value="feedback" />
-            <input name="name" type="text" />
-            <input name="email" type="text" />
-            <input name="message" type="text" />
+import Head from 'next/head';
+
+export default function Home() {
+  return (
+    <>
+      <Head>
+        <title>Solicitação de Equipamentos</title>
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+        />
+      </Head>
+      <div className="container mt-5">
+        <h1 className="text-center">Gestão de Solicitação de Equipamentos</h1>
+
+        <form id="solicitacao-form" className="mt-4">
+          <div className="mb-3">
+            <label className="form-label">Nome</label>
+            <input type="text" id="nome" className="form-control" required />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Sobrenome</label>
+            <input type="text" id="sobrenome" className="form-control" required />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Setor</label>
+            <input type="text" id="setor" className="form-control" required />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Equipamento</label>
+            <input type="text" id="equipamento" className="form-control" required />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Data</label>
+            <input type="date" id="data" className="form-control" required />
+          </div>
+
+          <button type="submit" className="btn btn-primary">Enviar Solicitação</button>
         </form>
-    </body>
-</html>
+
+        <h2 className="mt-5">Lista de Solicitações</h2>
+        <table className="table table-bordered mt-3">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Sobrenome</th>
+              <th>Setor</th>
+              <th>Equipamento</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="solicitacoes-list"></tbody>
+        </table>
+      </div>
+
+      <script>
+        document.getElementById('solicitacao-form').addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const solicitacao = {
+            nome: document.getElementById('nome').value,
+            sobrenome: document.getElementById('sobrenome').value,
+            setor: document.getElementById('setor').value,
+            equipamento: document.getElementById('equipamento').value,
+            data: document.getElementById('data').value,
+          };
+
+          const response = await fetch('/api/solicitacoes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(solicitacao)
+          });
+
+          if (response.ok) {
+            alert('Solicitação enviada!');
+            location.reload();
+          }
+        });
+
+        async function carregarSolicitacoes() {
+          const response = await fetch('/api/solicitacoes');
+          const solicitacoes = await response.json();
+          const lista = document.getElementById('solicitacoes-list');
+          lista.innerHTML = solicitacoes.map(solicitacao => `
+            <tr>
+              <td>${solicitacao.nome}</td>
+              <td>${solicitacao.sobrenome}</td>
+              <td>${solicitacao.setor}</td>
+              <td>${solicitacao.equipamento}</td>
+              <td>${solicitacao.data}</td>
+            </tr>
+          `).join('');
+        }
+
+        carregarSolicitacoes();
+      </script>
+    </>
+  );
+}
